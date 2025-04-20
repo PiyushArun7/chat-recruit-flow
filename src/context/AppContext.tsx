@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Candidate, BotStatus, ChatLog, RecruitmentFlow, FAQ, DashboardStats } from '@/types';
 import { toast } from '@/components/ui/use-toast';
@@ -41,7 +40,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>(initialStats);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
 
-  // Calculate dashboard stats whenever candidates or chatLogs change
   useEffect(() => {
     const stats: DashboardStats = {
       totalCandidates: candidates.length,
@@ -53,24 +51,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setDashboardStats(stats);
   }, [candidates, chatLogs]);
 
-  // Mock functions for now - these would be connected to your API in production
   const connectBot = async () => {
     try {
       setBotStatus({ isConnected: false, isStartingUp: true });
-      // This would be an API call in production
-      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Simulate getting a QR code
-      setBotStatus({ 
-        isConnected: false, 
-        isStartingUp: false,
-        qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=whatsapp-mock-connection'
-      });
+      const response = await fetch('http://localhost:3000/init-bot');
+      const data = await response.json();
       
-      toast({
-        title: "WhatsApp Bot Status",
-        description: "Scan QR code to connect WhatsApp",
-      });
+      if (data.qrCode) {
+        setBotStatus({ 
+          isConnected: false, 
+          isStartingUp: false,
+          qrCode: data.qrCode
+        });
+        
+        toast({
+          title: "WhatsApp Bot Status",
+          description: "Scan QR code to connect WhatsApp",
+        });
+      }
     } catch (error) {
       toast({
         variant: "destructive",
@@ -83,7 +82,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const disconnectBot = async () => {
     try {
-      // This would be an API call in production
       await new Promise(resolve => setTimeout(resolve, 1000));
       setBotStatus({ isConnected: false });
       toast({
@@ -101,7 +99,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const refreshQRCode = async () => {
     try {
-      // This would be an API call in production
       await new Promise(resolve => setTimeout(resolve, 1000));
       setBotStatus({
         ...botStatus,
@@ -120,9 +117,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Mock sample data for demonstration
   useEffect(() => {
-    // Mock candidates
     const mockCandidates: Candidate[] = [
       {
         id: '1',
@@ -169,7 +164,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ];
     setCandidates(mockCandidates);
 
-    // Mock chat logs
     const mockChatLogs: ChatLog[] = [
       {
         candidateId: '1',
@@ -192,7 +186,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ];
     setChatLogs(mockChatLogs);
 
-    // Mock recruitment flow
     const mockRecruitmentFlow: RecruitmentFlow = {
       steps: [
         { id: '1', step: 'interest', match: 'yes|interested|haan|ha|bilkul|ok|okay|sure|ready|zaroor|kyun nahi|main interested hoon|done', ask: 'Are you interested?' },
@@ -207,7 +200,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setRecruitmentFlow(mockRecruitmentFlow);
 
-    // Mock FAQs
     const mockFaqs: FAQ[] = [
       { key: 'ctc', response: 'The CTC depends on your experience and interview performance.' },
       { key: 'profile', response: 'The role is for Sales/Relationship Manager in Home Loan, LAP and Mortgage Loan.' },

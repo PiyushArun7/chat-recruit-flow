@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -44,7 +43,11 @@ export function BotStatusCard({
           
           {status.qrCode && !status.isConnected && (
             <div className="my-4 p-4 bg-white rounded-lg border">
-              <img src={status.qrCode} alt="WhatsApp QR Code" className="w-48 h-48" />
+              <img 
+                src={`data:image/png;base64,${status.qrCode}`} 
+                alt="WhatsApp QR Code" 
+                className="w-48 h-48"
+              />
               <p className="text-xs text-center mt-2 text-muted-foreground">
                 Scan with WhatsApp to connect
               </p>
