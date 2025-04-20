@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -80,7 +79,7 @@ const SettingsContent = () => {
               <div className="grid gap-4">
                 <div>
                   <Label htmlFor="min-experience">Minimum Experience (Years)</Label>
-                  <Input id="min-experience" type="number" defaultValue="2" min="0" step="0.5" />
+                  <Input id="min-experience" type="number" defaultValue="0.5" min="0" step="0.5" />
                 </div>
                 
                 <div>
