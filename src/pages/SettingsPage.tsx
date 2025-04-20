@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +10,81 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/sonner';
+import { useToast } from '@/hooks/use-toast';
 
 const SettingsContent = () => {
+  const { toast } = useToast();
+  const [criteria, setCriteria] = useState({
+    min_experience: 0.5,
+    max_notice_period: 60,
+    min_ctc: 1,
+    max_ctc: 6,
+    allowed_products: 'home loan, housing loan, hl, loan against property, lap, mortgage loan, ghar ka loan, home finance, loan housing'
+  });
+
+  useEffect(() => {
+    const fetchQualificationCriteria = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('qualification_criteria')
+          .select('*')
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          setCriteria({
+            min_experience: data.min_experience,
+            max_notice_period: data.max_notice_period,
+            min_ctc: data.min_ctc,
+            max_ctc: data.max_ctc,
+            allowed_products: data.allowed_products.join(', ')
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching qualification criteria:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch qualification criteria',
+          variant: 'destructive'
+        });
+      }
+    };
+
+    fetchQualificationCriteria();
+  }, []);
+
+  const handleSaveCriteria = async () => {
+    try {
+      const { error } = await supabase
+        .from('qualification_criteria')
+        .update({
+          min_experience: Number(criteria.min_experience),
+          max_notice_period: Number(criteria.max_notice_period),
+          min_ctc: Number(criteria.min_ctc),
+          max_ctc: Number(criteria.max_ctc),
+          allowed_products: criteria.allowed_products.split(',').map(p => p.trim())
+        })
+        .eq('id', (await supabase.from('qualification_criteria').select('id').single()).data?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Qualification criteria updated successfully',
+      });
+    } catch (error) {
+      console.error('Error saving qualification criteria:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save qualification criteria',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
@@ -79,20 +153,47 @@ const SettingsContent = () => {
               <div className="grid gap-4">
                 <div>
                   <Label htmlFor="min-experience">Minimum Experience (Years)</Label>
-                  <Input id="min-experience" type="number" defaultValue="0.5" min="0" step="0.5" />
+                  <Input 
+                    id="min-experience" 
+                    type="number" 
+                    value={criteria.min_experience}
+                    onChange={(e) => setCriteria({...criteria, min_experience: Number(e.target.value)})}
+                    min="0" 
+                    step="0.5" 
+                  />
                 </div>
                 
                 <div>
                   <Label htmlFor="max-notice">Maximum Notice Period (Days)</Label>
-                  <Input id="max-notice" type="number" defaultValue="60" min="0" />
+                  <Input 
+                    id="max-notice" 
+                    type="number" 
+                    value={criteria.max_notice_period}
+                    onChange={(e) => setCriteria({...criteria, max_notice_period: Number(e.target.value)})}
+                    min="0" 
+                  />
                 </div>
                 
                 <div className="grid gap-2">
                   <Label htmlFor="ctc-range">CTC Range (LPA)</Label>
                   <div className="flex items-center gap-2">
-                    <Input id="min-ctc" type="number" defaultValue="1" min="0" step="0.1" />
+                    <Input 
+                      id="min-ctc" 
+                      type="number" 
+                      value={criteria.min_ctc}
+                      onChange={(e) => setCriteria({...criteria, min_ctc: Number(e.target.value)})}
+                      min="0" 
+                      step="0.1" 
+                    />
                     <span>to</span>
-                    <Input id="max-ctc" type="number" defaultValue="6" min="0" step="0.1" />
+                    <Input 
+                      id="max-ctc" 
+                      type="number" 
+                      value={criteria.max_ctc}
+                      onChange={(e) => setCriteria({...criteria, max_ctc: Number(e.target.value)})}
+                      min="0" 
+                      step="0.1" 
+                    />
                   </div>
                 </div>
                 
@@ -101,14 +202,15 @@ const SettingsContent = () => {
                   <Textarea
                     id="allowed-products"
                     className="min-h-20"
-                    defaultValue="home loan, housing loan, hl, loan against property, lap, mortgage loan, ghar ka loan, home finance, loan housing"
+                    value={criteria.allowed_products}
+                    onChange={(e) => setCriteria({...criteria, allowed_products: e.target.value})}
                   />
                   <p className="text-sm text-muted-foreground mt-1">
                     Comma separated list of product keywords
                   </p>
                 </div>
                 
-                <Button>Save Criteria</Button>
+                <Button onClick={handleSaveCriteria}>Save Criteria</Button>
               </div>
             </CardContent>
           </Card>

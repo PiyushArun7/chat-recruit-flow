@@ -9,7 +9,78 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      qualification_criteria: {
+        Row: {
+          allowed_products: string[]
+          created_at: string
+          id: string
+          max_ctc: number
+          max_notice_period: number
+          min_ctc: number
+          min_experience: number
+          updated_at: string
+        }
+        Insert: {
+          allowed_products?: string[]
+          created_at?: string
+          id?: string
+          max_ctc?: number
+          max_notice_period?: number
+          min_ctc?: number
+          min_experience?: number
+          updated_at?: string
+        }
+        Update: {
+          allowed_products?: string[]
+          created_at?: string
+          id?: string
+          max_ctc?: number
+          max_notice_period?: number
+          min_ctc?: number
+          min_experience?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      qualified_candidates: {
+        Row: {
+          company: string | null
+          created_at: string
+          ctc: string | null
+          experience: number | null
+          id: string
+          phone: string
+          prev_company: string | null
+          product: string | null
+          qualification_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          ctc?: string | null
+          experience?: number | null
+          id?: string
+          phone: string
+          prev_company?: string | null
+          product?: string | null
+          qualification_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          ctc?: string | null
+          experience?: number | null
+          id?: string
+          phone?: string
+          prev_company?: string | null
+          product?: string | null
+          qualification_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
