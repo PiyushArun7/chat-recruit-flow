@@ -1,0 +1,10 @@
+
+step,match,ask
+interest,"yes|interested|haan|ha|bilkul|ok|okay|sure|ready|zaroor|kyun nahi|main interested hoon|done","Are you interested ?"
+company,,"Currently in which company are you working?"
+prev_company,,"Okay, which was your previous company?"
+notice,,"Ok and your notice period?"
+ctc,,"Ok, What's your current CTC?"
+product,,"Ok, Which product are you currently handling?"
+experience,,"How many years of experience in this product?"
+cv,,"Kindly forward me your CV."
