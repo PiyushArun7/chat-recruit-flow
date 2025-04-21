@@ -1,9 +1,15 @@
 
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const express = require('express');
-const axios = require('axios');
-const qrcode = require('qrcode-terminal');
-const fs = require('fs');
+import { Client, LocalAuth } from 'whatsapp-web.js';
+import express from 'express';
+import axios from 'axios';
+import qrcode from 'qrcode-terminal';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Get the directory path of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 app.use(express.json());
@@ -13,6 +19,21 @@ const client = new Client({
 });
 
 const ADMIN_NUMBER = '916200083509@c.us';
+
+// Try to load start messages from file
+let startMessages = [];
+try {
+    const startMessagesPath = join(__dirname, '../../start_messages.txt');
+    startMessages = fs.readFileSync(startMessagesPath, 'utf-8')
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+    console.log(`✅ Loaded ${startMessages.length} start messages`);
+} catch (err) {
+    console.warn(`⚠️ Could not load start_messages.txt: ${err.message}`);
+    console.log('Create a start_messages.txt file in the root directory to send initial messages');
+    startMessages = ["Hello! I'm a recruitment bot. I'll be asking you a few questions. Reply to continue."];
+}
 
 // Show QR for login
 client.on('qr', qr => {
@@ -24,17 +45,25 @@ client.on('qr', qr => {
 client.on('ready', async () => {
     console.log('✅ WhatsApp Bot is ready!');
 
-    const numbers = fs.readFileSync('numbers.txt', 'utf-8')
-        .split('\n')
-        .map(n => n.trim())
-        .filter(n => n.length > 0);
-
-    for (const number of numbers) {
-        const chatId = number.includes('@c.us') ? number : `${number}@c.us`;
-        for (const msg of startMessages) {
-            await client.sendMessage(chatId, msg);
-            await new Promise(r => setTimeout(r, 1000));
+    try {
+        const numbersPath = join(__dirname, '../../numbers.txt');
+        const numbers = fs.readFileSync(numbersPath, 'utf-8')
+            .split('\n')
+            .map(n => n.trim())
+            .filter(n => n.length > 0);
+        
+        console.log(`📋 Loaded ${numbers.length} numbers to message`);
+        
+        for (const number of numbers) {
+            const chatId = number.includes('@c.us') ? number : `${number}@c.us`;
+            for (const msg of startMessages) {
+                await client.sendMessage(chatId, msg);
+                await new Promise(r => setTimeout(r, 1000));
+            }
         }
+    } catch (err) {
+        console.warn(`⚠️ Could not load numbers.txt: ${err.message}`);
+        console.log('Create a numbers.txt file in the root directory with one phone number per line');
     }
 });
 
